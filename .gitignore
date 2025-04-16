@@ -8,6 +8,7 @@ __pycache__/
 # Archivos de configuración
 .env
 *.env
+controlVacaciones/settings.py
 
 # Archivos de sistema
 .DS_Store
