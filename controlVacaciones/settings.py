@@ -77,11 +77,11 @@ WSGI_APPLICATION = 'controlVacaciones.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'T2',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '.\\SQLEXPRESS',
-        'PORT': '',
+        'NAME': 'db_tarea2',
+        'USER': 'admin',
+        'PASSWORD': 'Tarea2Bases',
+        'HOST': 'db-tarea2.cxc2e4mqm0y6.us-east-2.rds.amazonaws.com',
+        'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
         },
