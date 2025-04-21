@@ -9,6 +9,10 @@ body {
 }
 
 .contenedor_login {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: #1e1e1e;
     padding: 32px 48px; 
     border-radius: 12px;
@@ -83,3 +87,15 @@ button:hover {
     text-align: center;
 }
 
+.swal2-container {
+    z-index: 2000 !important;
+
+}
+
+.swal2-popup {
+    background-color: #1e1e1e !important; /* Dark background for the modal */
+    color: #ffffff !important; /* White text color for the modal */
+}
+.swal2-title {
+    color: #ffffff !important; /* White title color for the modal */
+}

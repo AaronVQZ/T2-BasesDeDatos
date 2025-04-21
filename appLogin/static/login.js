@@ -55,12 +55,30 @@ document.addEventListener("DOMContentLoaded", function() {
             // Manejar la respuesta del servidor
             if (data.success) {
                 // Show success message and redirect
-                alert(`Bienvenido, ${data.username}`);
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                }
+                //alert(`Bienvenido, ${data.username}`);
+                Swal.fire({
+                    title: 'Bienvenido',
+                    text: `Bienvenido, ${data.username}`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        setTimeout(() => {
+                            window.location.href = data.redirect; // Redirigir a la URL proporcionada    
+                        }, 2000); // 2 segundos
+                    },
+                });
+                
             } else {
-                alert("error en el login");
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || "Ocurrió un error inesperado.",
+                    icon: 'error',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
             }
         })
         .catch((error) => {
