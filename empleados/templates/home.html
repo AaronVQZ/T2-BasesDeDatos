@@ -1,0 +1,65 @@
+{% load static%}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'estilos.css' %}">
+    <title>colaboradores</title>
+</head>
+<body>
+    <!-- Inicio del Cuerpo  -->
+
+    <!-- Contenedor del titulo -->
+    <div class="contenedor_titulo">
+        <h1 id="titulo">Control de Empleados</h1>
+    </div>
+    
+    <!-- ************************************************************************************************************* -->
+
+    <!--contenedor -->
+    <div class="contenedor_busqueda">
+        <input
+            type="text"
+            id="search-bar"
+            class="search-input"
+            placeholder="Buscar empleados..."
+        />
+        <button id="search-button" class="search-button">Buscar</button>
+        <div id="contenedor_resultados">
+            <!-- Aquí van los resultados -->
+        </div>
+    </div>
+
+
+
+    <!-- Contenedor de la lista 
+    <div class="contenedor_lista">
+        
+        <table class="tabla">
+            <tr class="encabezado">
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Salario</th>
+            </tr>
+            {% for empleado in empleados %}
+            <tr>
+                <td>{{ empleado.0 }}</td>
+                <td>{{ empleado.1 }}</td>
+                <td>{{ empleado.2 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    -->
+
+    <!-- ************************************************************************************************************* -->
+
+
+    
+    
+    <!--<script src="{% static 'script.js' %}"></script>>
+</body>
+</html>

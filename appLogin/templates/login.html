@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -5,11 +6,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'login.css' %}">
+    <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
     <title>Login</title>
 </head>
 <body>
+    <div id="error-container">
+        {% if error %}
+            {{ error }}
+        {% endif %}
+
+    </div>
+    
     <div class="contenedor_login">
-        <form action="/my-handling-form-page" method="post">
+        <form id="login-form" method="post">
+            {% csrf_token %}
             <h1>Iniciar Sesión</h1>
             <ul>
                 <li>
@@ -22,13 +32,13 @@
                     <input type="password" id="password" name="password" required>
                 </li>
                 <li>
-                    <button>
+                    <button type="submit" id="boton_login">
                         <span>Iniciar Sesión</span>
                     </button>
                 </li>
             </ul>
         </form>
     </div>
-    
+    <script src="{% static 'login.js' %}"></script>
 </body>
 </html>
