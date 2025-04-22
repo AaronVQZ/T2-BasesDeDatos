@@ -32,28 +32,27 @@
             <!-- Aquí van los resultados -->
         </div>
     </div>
+    
+    <!-- ************************************************************************************************************* -->
+    <br>
+    <br>
 
-
-
-    <!-- Contenedor de la lista 
+    <!-- Contenedor de la lista -->
     <div class="contenedor_lista">
-        
         <table class="tabla">
             <tr class="encabezado">
-                <th>ID</th>
                 <th>Nombre</th>
-                <th>Salario</th>
+                <th>Identificación</th>
             </tr>
             {% for empleado in empleados %}
             <tr>
                 <td>{{ empleado.0 }}</td>
                 <td>{{ empleado.1 }}</td>
-                <td>{{ empleado.2 }}</td>
             </tr>
             {% endfor %}
         </table>
     </div>
-    -->
+    
 
     <!-- ************************************************************************************************************* -->
 
