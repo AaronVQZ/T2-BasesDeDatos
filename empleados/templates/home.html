@@ -26,6 +26,7 @@
             id="search-bar"
             class="search-input"
             placeholder="Buscar empleados..."
+            value = "{{ search_query }}"
         />
         <button id="search-button" class="search-button">Buscar</button>
         <div id="contenedor_resultados">
@@ -39,15 +40,15 @@
 
     <!-- Contenedor de la lista -->
     <div class="contenedor_lista">
-        <table class="tabla">
+        <table class="tabla" id="tabla_empleados">
             <tr class="encabezado">
                 <th>Nombre</th>
                 <th>Identificación</th>
             </tr>
             {% for empleado in empleados %}
             <tr>
-                <td>{{ empleado.0 }}</td>
-                <td>{{ empleado.1 }}</td>
+                <td>{{ empleado.nombre }}</td>
+                <td>{{ empleado.identificacion }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -59,6 +60,6 @@
 
     
     
-    <!--<script src="{% static 'script.js' %}"></script>>
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
