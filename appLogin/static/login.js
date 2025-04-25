@@ -1,104 +1,83 @@
-// Esperar a que el DOM esté cargado
 document.addEventListener("DOMContentLoaded", function() {
+
+    //Obtener formulario de inicio de sesión
     const form = document.getElementById("login-form");
-    const errorContainer = document.getElementById("error-container");
-    errorContainer.innerText = ""; // Limpiar mensajes de error previos
-    
-    
-    form.onsubmit = function(event) {
 
-        event.preventDefault(); // Evitar que se recargue la página
-        
-        // Capturar los valores ingresados
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
+    //Evento para cuando se envia el formulario
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-        // Validar datos antes de enviarlos
+        //Obtiene y limpia los valores de los campos de usuario y contraseña
+        let username = document.getElementById("username").value.trim();
+        let password = document.getElementById("password").value.trim();
+
+        // Validar campos vacíos
         if (!username || !password) {
-            errorContainer.innerText = "Por favor, complete todos los campos.";
-            errorContainer.style.display = "block"; // Mostrar el contenedor de error
+            // Mostrar alerta de error si los campos están vacíos
+            Swal.fire({
+                title: 'Error',
+                text: 'Complete todos los campos',
+                icon: 'error',
+                timer: 2000
+            });
             return;
-        }else{
-            errorContainer.style.display = "none"; // Ocultar el contenedor de error
         }
-        //linea de prueba
-        console.log("Datos enviados:", { username, password });
 
+        //Imprimir en consola los datos que se van a enviar al servidor (Verificacion)
+        console.log("Enviando datos:", { username, password });
 
-        // se crea un objeto JSON con los datos del formulario
-        const jsonData = {
-            username: username,
-            password: password
-        };
-        
-        // Enviar datos al servidor como JSON
-        fetch("/login/", { 
-            method: "POST",
-            body: JSON.stringify(jsonData),
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getCSRFTOKEN(),
-                "Content-Type": "application/json",
-                'Accept': 'application/json'
-            },
+        // Enviar datos al servidor
+        try {
+            const response = await fetch("/login/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", // Asegurarse de que se está enviando como JSON
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                },
+                body: JSON.stringify({ username, password })  // Asegurarse de que los datos se envíen como JSON
+            });
 
-        })
-        .then((response) => {
-            if (!response.ok) {
-                return response.json().catch(() => {
-                    throw new Error("Error de red o respuesta no válida.");
-                });
-            }
-            return response.json();
-        })
-        .then((data) => {
-            // Manejar la respuesta del servidor
+            //Convierte la respuesta del servidor a JSON
+            const data = await response.json();
+
+            //Imprimir en consola la respuesta del servidor (Verificacion)
+            console.log("Respuesta del servidor:", data);
+
+            //Verifica si la respuesta es exitosa o no
             if (data.success) {
-                // Show success message and redirect
-                //alert(`Bienvenido, ${data.username}`);
+                // Si la respuesta es exitosa, redirigir al usuario a la página de inicio
+                window.location.href = data.redirect;
+            } 
+            //Si el servidor responde que la ip está bloqueada
+            else if (data.error === "blocked") {
                 Swal.fire({
-                    title: 'Bienvenido',
-                    text: `Bienvenido, ${data.username}`,
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        setTimeout(() => {
-                            window.location.href = data.redirect; // Redirigir a la URL proporcionada    
-                        }, 2000); // 2 segundos
-                    },
+                    title: 'Bloqueado',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.reload(); // Recargar la página para mostrar el mensaje de error
                 });
-                
-            } else {
+            } 
+            //En caso de que las credenciales sean incorrectas
+            else {
                 Swal.fire({
                     title: 'Error',
-                    text: data.message || "Ocurrió un error inesperado.",
+                    text: data.message || "Error desconocido",
                     icon: 'error',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    allowOutsideClick: false
+                    timer: 2000
                 });
             }
-        })
-        .catch((error) => {
-            print("catch error");
-            // mostrar el error en el contenedor de error
-            errorContainer.style.display = "block"; // Mostrar el contenedor de error
-            errorContainer.innerText = error.message || "Ocurrió un error inesperado.";
-            console.error("Login error:", error);
-        })
-    }
-    
-    function getCSRFTOKEN() {
-    const token = document.querySelector("[name=csrfmiddlewaretoken]");
-    if (!token) {
-        console.error("CSRF token not found");
-        throw new Error("CSRF token not found");
-    }
-    return token.value;
-}
-
-    
-
-})
+        } 
+        
+        //En caso de que no se pueda conectar al servidor
+        catch (error) {
+            Swal.fire({
+                title: 'Error crítico',
+                text: 'No se pudo conectar al servidor',
+                icon: 'error',
+                timer: 3000
+            });
+        }
+    });
+});
