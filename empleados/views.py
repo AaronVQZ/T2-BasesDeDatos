@@ -53,3 +53,21 @@ def buscar_empleados(request):
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
 
+#-------------------------------------------------------------
+# Función para insertar un nuevo empleado
+def insertar_empleado(request):
+    print("insertar_empleado")
+#-------------------------------------------------------------
+# Función para actualizar un empleado existente
+def update_empleado(request):
+    print("update_empleado")
+
+#-------------------------------------------------------------
+# Función para eliminar un empleado
+def delete_empleado(request):
+    print("delete_empleado")
+
+#-------------------------------------------------------------
+# Función para consultar un empleado específico
+def consular_empleado(request):
+    print("consultar_empleado")
