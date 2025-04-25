@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db import connection
+
+#-------------------------------------------------------------
+# Vista principal que muestra la lista de empleados
+
 def home(request):
     search_query = request.GET.get("search", '')
 
@@ -16,9 +20,8 @@ def home(request):
             "search_query": search_query
         })
 
-    #return render(request, "home.html", {"empleados": lista_empleados})
-
-
+#-------------------------------------------------------------
+# Función para obtener empleados desde la base de datos
 def obtener_empleados(search_term=''):
     
     connection.ensure_connection()
@@ -30,23 +33,20 @@ def obtener_empleados(search_term=''):
     else:
         query = "EXEC sp_obtenerEmpleados"
         empleados = conn.execute(query).fetchall()
-        print(empleados)
 
+    # Se convierten los resultados a una lista de diccionarios
     empleados_list = [{'nombre': row[0],'identificacion': row[1],} for row in empleados]
-    print(f'\n\nlista 2 {empleados_list}')
-
-
     return empleados_list if empleados else []
     
-
-    
+#-------------------------------------------------------------
+# Función para manejar la búsqueda de empleados desde AJAX
 def buscar_empleados(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         try:
-            search_term = request.GET.get("term", '')
-            empleados = obtener_empleados(search_term)
-            print(empleados)
+            termino_por_buscar = request.GET.get("term", '')
+            empleados = obtener_empleados(termino_por_buscar)
             return JsonResponse({"success": True, "empleados": empleados}, safe=False)
+
         except Exception as e:
             return JsonResponse({"success": True, "error": str(e)}, status=500)
 

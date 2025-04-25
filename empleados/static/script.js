@@ -1,13 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search-bar');
     const searchButton = document.getElementById('search-button');
-    const tabla = document.getElementById('tabla-empleados');
-    //const tabla = document.querySelector('.tabla tbody') || document.querySelector('.tabla');
+    const tabla = document.getElementById('tabla_empleados');
+    
 
     // Función para actualizar la tabla
-    function updateTable(empleados) {
+    function actualizarTabla(empleados) {
+
+        // Para debuggear
         console.log('Empleados:', empleados);
-        // Mantener el encabezado
+
+        // Define el encabado de la tabla
         let tableContent = `
             <tr class="encabezado">
                 <th>Nombre</th>
@@ -24,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tr>
             `;
         });
-        
-        //tabla.innerHTML = tableContent;
+        // Actualiza el contenido de la tabla
+        tabla.innerHTML = tableContent;
     }
 
     // Evento para el botón de búsqueda
@@ -34,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchEmpleados(searchTerm);
     });
 
-    // Evento para búsqueda al escribir
+    // Evento para búsqueda al dar ENTER
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
             const searchTerm = this.value.trim();
@@ -44,8 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para obtener empleados
     function fetchEmpleados(term) {
-        //tabla.innerHTML = '<tr><td colspan="2">Buscando...</td></tr>';
 
+        //actualiza el contenido la tabla con un mensaje de carga
+        tabla.innerHTML = '<tr><td colspan="2">Buscando...</td></tr>';
+
+        // Petición para buscar empleados
         fetch(`/home/buscar-empleados/?term=${encodeURIComponent(term)}`, {
             method: 'GET',
             headers: {
@@ -61,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if ( data.success && Array.isArray(data.empleados)) {
                 if (data.empleados.length === 0) {
-                    console.log('No se encontraron empleados');
+                    tabla.innerHTML = '<tr><td colspan="2">No hubo coincidencias</td></tr>';
                 } else {
-                    updateTable(data.empleados);
+                    actualizarTabla(data.empleados);
                 }
             } else {
                 throw new Error('Formato de respuesta inválido');
@@ -71,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error en la búsqueda:', error);
-            //tabla.innerHTML = `<tr><td colspan="2">Error: ${error.message}</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="2">Error: ${error.message}</td></tr>`;
         });
     }
 });
