@@ -100,7 +100,7 @@ class Command(BaseCommand):
                     err.attrib['Codigo'],
                     err.attrib['Descripcion']
                 ),
-                f"✅ Error insertado: Código={err.attrib['Codigo']} - {err.attrib['Descripcion']}"
+                f"Error insertado: Código={err.attrib['Codigo']} - {err.attrib['Descripcion']}"
             )
 
     
