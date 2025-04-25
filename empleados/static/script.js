@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <tr class="encabezado">
                 <th>Nombre</th>
                 <th>Identificación</th>
+                <th>Acciones</th>
             </tr>
         `;
         
@@ -24,6 +25,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td>${empleado.nombre}</td>
                     <td>${empleado.identificacion}</td>
+                    <td class="acciones">
+                    <button class="boton_consultar" onclick="consultarEmpleado('${empleado.identificacion}')">
+                        Consultar
+                    </button>
+                    <button class="boton_modificar" onclick="modificarEmpleado('${empleado.identificacion}')">
+                        Modificar
+                    </button>
+                    <button class="boton_borrar" onclick="borrarEmpleado('${empleado.identificacion}')">
+                        Borrar
+                    </button>
                 </tr>
             `;
         });

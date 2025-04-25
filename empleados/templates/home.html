@@ -45,11 +45,23 @@
             <tr class="encabezado">
                 <th>Nombre</th>
                 <th>Identificación</th>
+                <th>Acciones</th>
             </tr>
             {% for empleado in empleados %}
             <tr>
                 <td>{{ empleado.nombre }}</td>
                 <td>{{ empleado.identificacion }}</td>
+                <td class="acciones">
+                    <button class="boton_consultar" onclick="consularEmpleado('{{ empleado.identificacion }}')">
+                        Consultar
+                    </button>
+                    <button class="boton_modificar" onclick="modificarEmpleado('{{ empleado.identificacion }}')">
+                        Modificar
+                    </button>
+                    <button class="boton_borrar" onclick="borrarEmpleado('{{ empleado.identificacion }}')">
+                        Borrar
+                    </button>
+                </td>
             </tr>
             {% endfor %}
         </table>
