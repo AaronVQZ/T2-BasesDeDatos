@@ -22,14 +22,20 @@ def home(request):
 
 #-------------------------------------------------------------
 # Función para obtener empleados desde la base de datos
-def obtener_empleados(search_term=''):
+def obtener_empleados(search_term='',termino_son_letras='',id_usuario=None,ip_usuario=None):
     
     connection.ensure_connection()
     conn = connection.connection
     
     if search_term:
-        query = "EXEC sp_BuscarEmpleado ?"
-        empleados = conn.execute(query,[search_term]).fetchall()
+
+        empleados = conn.execute("""
+                EXEC sp_BuscarEmpleado 
+                @searchTerm =?,
+                @terminoSonLetras = ?,
+                @idUsuario = ?,
+                @ipUsuario = ?;
+                """,(search_term, termino_son_letras, int(id_usuario), str(ip_usuario))).fetchall()
     else:
         query = "EXEC sp_obtenerEmpleados"
         empleados = conn.execute(query).fetchall()
@@ -43,8 +49,12 @@ def obtener_empleados(search_term=''):
 def buscar_empleados(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         try:
+            id_usuario = request.session.get("_auth_user_id")
+            ip_usuario = request.session.get("_auth_user_ip")
             termino_por_buscar = request.GET.get("term", '')
-            empleados = obtener_empleados(termino_por_buscar)
+            termino_son_letras = request.GET.get("terminoSonLetras", '')
+            empleados = obtener_empleados(termino_por_buscar,termino_son_letras,id_usuario,ip_usuario)
+            
             return JsonResponse({"success": True, "empleados": empleados}, safe=False)
 
         except Exception as e:
@@ -52,6 +62,17 @@ def buscar_empleados(request):
 
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def registrar_busqueda(termino_son_letras):
+    try:
+        connection.ensure_connection()
+        conn = connection.connection
+        query = "EXEC sp_InsertarBitacoraEvento ?"
+        conn.execute(query, [termino_son_letras])
+    except Exception as e:
+        print(f"Error al registrar la búsqueda: {e}")
+
 
 #-------------------------------------------------------------
 # Función para insertar un nuevo empleado

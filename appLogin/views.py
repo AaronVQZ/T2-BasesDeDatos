@@ -77,6 +77,21 @@ def login(request):
 
             # Si las credenciales son válidas, se redirige al usuario a la página de inicio
             if es_valido:
+                #obtener el id del usuario
+                id_usuario = conn.execute("""
+                        DECLARE @Id INT;
+                        EXEC dbo.sp_GetIdUsuario 
+                            @Username = ?,
+                            @Password = ?, 
+                            @Id = @Id OUTPUT;
+                            SELECT @Id AS Id;""", 
+                        (username, password)).fetchone()[0]
+                
+                request.session['_auth_user_id'] = id_usuario # Guardar la Id del usuario en la sesión
+                request.session['_auth_user_backend'] = 'django.contrib.auth.backends.ModelBackend' # Guardar el backend de autenticación en la sesión
+                request.session['_auth_user_ip'] = ip # Guardar la IP del usuario en la sesión
+                request.user = Usuario(id_usuario=id_usuario, username=username) # Crear un objeto de usuario con la ID y el nombre de usuario
+
                 return JsonResponse({"success": True, "redirect": "/home"})
             else:
                 # Si las credenciales no son válidas, se retorna un mensaje de error
@@ -113,3 +128,16 @@ def login(request):
 
     return render(request, "login.html", {"blocked": False})
 
+
+class Usuario:
+    def __init__(self, id_usuario, username):
+        self.id_usuario = id_usuario
+        self.username = username
+    
+    @property
+    def valido(self):
+        return True
+    
+    def username(self):
+        return self.username
+    
