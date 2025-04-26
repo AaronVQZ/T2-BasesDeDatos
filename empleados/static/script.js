@@ -91,4 +91,59 @@ document.addEventListener('DOMContentLoaded', function() {
             tabla.innerHTML = `<tr><td colspan="2">Error: ${error.message}</td></tr>`;
         });
     }
+    
+     // Modal y formulario
+    const btnAgregar = document.getElementById('boton_agregar');
+    const modal = document.getElementById('modalInsertarEmpleado');
+    const spanCerrar = modal.querySelector('.cerrar');
+    const form = document.getElementById('formInsertarEmpleado');
+
+    btnAgregar.addEventListener('click', () => {
+        form.reset();
+        modal.style.display = 'flex';
+    });
+
+    spanCerrar.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', e => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Validaciones básicas como en tu código original
+        const nombre = form.nombre.value.trim();
+        const idDoc = form.identificacion.value.trim();
+        const puesto = form.puesto.value;
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+$/.test(nombre)) {
+        return alert('El nombre solo puede contener letras, espacios y guiones');
+        }
+        if (!/^\d+$/.test(idDoc)) {
+        return alert('La cédula debe ser sólo dígitos');
+        }
+        if (!puesto) {
+        return alert('Selecciona un puesto');
+        }
+
+        const formData = new FormData(form);
+        fetch('insertar-empleado/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.mensaje) {
+            alert(data.mensaje);
+            modal.style.display = 'none';
+            location.reload();  // o llamar a tu fetchEmpleados('')
+        } else {
+            alert(data.error || 'Error desconocido');
+        }
+        })
+        .catch(console.error);
+    });
+    
+    
 });

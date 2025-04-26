@@ -1,78 +1,81 @@
-{% load static%}
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
-    <link rel="stylesheet" href="{% static 'estilos.css' %}">
-    <title>colaboradores</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
+  <link rel="stylesheet" href="{% static 'estilos.css' %}">
+  <title>Control de Empleados</title>
 </head>
 <body>
-    <!-- Inicio del Cuerpo  -->
+  <div class="contenedor_titulo">
+    <h1 id="titulo">Control de Empleados</h1>
+  </div>
 
-    <!-- Contenedor del titulo -->
-    <div class="contenedor_titulo">
-        <h1 id="titulo">Control de Empleados</h1>
+  <div class="contenedor_busqueda">
+    <input type="text" id="search-bar" class="search-input" placeholder="Buscar empleados..." value="{{ search_query }}">
+    <button id="search-button" class="search-button">Buscar</button>
+  </div>
+
+  <div class="contenedor_lista">
+    <table class="tabla" id="tabla_empleados">
+      <tr class="encabezado">
+        <th>Nombre</th>
+        <th>Identificación</th>
+        <th>Acciones</th>
+      </tr>
+      {% for empleado in empleados %}
+      <tr>
+        <td>{{ empleado.nombre }}</td>
+        <td>{{ empleado.identificacion }}</td>
+        <td class="acciones">
+          <button class="boton_consultar" onclick="consultarEmpleado('{{ empleado.identificacion }}')">Consultar</button>
+          <button class="boton_modificar" onclick="modificarEmpleado('{{ empleado.identificacion }}')">Modificar</button>
+          <button class="boton_borrar" onclick="borrarEmpleado('{{ empleado.identificacion }}')">Borrar</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="contenedor_botones">
+    <button id="boton_agregar">Agregar Empleado</button>
+  </div>
+
+  <!-- Modal Insertar Empleado -->
+  <div id="modalInsertarEmpleado" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar">&times;</span>
+      <h2>Insertar Nuevo Empleado</h2>
+      <form id="formInsertarEmpleado" method="POST">
+        {% csrf_token %}
+        <label for="identificacion">Documento de Identidad:</label>
+        <input type="text" id="identificacion" name="identificacion" required>
+        <br><br>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required>
+        <br><br>
+        <label for="puesto">Puesto:</label>
+        <select id="puesto" name="puesto" required>
+          <option value="">-- Seleccione --</option>
+          <option value="Albañil">Albañil</option>
+          <option value="Asistente">Asistente</option>
+          <option value="Cajero">Cajero</option>
+          <option value="Camarero">Camarero</option>
+          <option value="Conductor">Conductor</option>
+          <option value="Conserje">Conserje</option>
+          <option value="Cuidador">Cuidador</option>
+          <option value="Fontanero">Fontanero</option>
+          <option value="Niñera">Niñera</option>
+          <option value="Recepcionista">Recepcionista</option>
+        </select>
+        <br><br>
+        <button type="submit">Insertar</button>
+      </form>
     </div>
-    
-    <!-- ************************************************************************************************************* -->
+  </div>
 
-    <!--contenedor -->
-    <div class="contenedor_busqueda">
-        <input
-            type="text"
-            id="search-bar"
-            class="search-input"
-            placeholder="Buscar empleados..."
-            value = "{{ search_query }}"
-        />
-        <button id="search-button" class="search-button">Buscar</button>
-        <div id="contenedor_resultados">
-            <!-- Aquí van los resultados -->
-        </div>
-    </div>
-    
-    <!-- ************************************************************************************************************* -->
-    <br>
-    <br>
-
-    <!-- Contenedor de la lista -->
-    <div class="contenedor_lista">
-        <table class="tabla" id="tabla_empleados">
-            <tr class="encabezado">
-                <th>Nombre</th>
-                <th>Identificación</th>
-                <th>Acciones</th>
-            </tr>
-            {% for empleado in empleados %}
-            <tr>
-                <td>{{ empleado.nombre }}</td>
-                <td>{{ empleado.identificacion }}</td>
-                <td class="acciones">
-                    <button class="boton_consultar" onclick="consularEmpleado('{{ empleado.identificacion }}')">
-                        Consultar
-                    </button>
-                    <button class="boton_modificar" onclick="modificarEmpleado('{{ empleado.identificacion }}')">
-                        Modificar
-                    </button>
-                    <button class="boton_borrar" onclick="borrarEmpleado('{{ empleado.identificacion }}')">
-                        Borrar
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    
-
-    <!-- ************************************************************************************************************* -->
-
-
-    
-    
-    <script src="{% static 'script.js' %}"></script>
+  <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
