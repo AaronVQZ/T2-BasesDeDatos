@@ -42,28 +42,63 @@ document.addEventListener('DOMContentLoaded', function() {
         tabla.innerHTML = tableContent;
     }
 
+
+    // Función para validar el termino de búsqueda
+    function validarTermino(termino) {
+        const soloLetras = /^[a-záéíóúñA-ZÁÉÍÓÚÑ\s]+$/; // Expresión regular para letras y espacios
+        const soloNumeros = /^[0-9]+$/; // Expresión regular para números
+
+        if( !termino)
+            return { valido: true};
+        
+        if (!soloLetras.test(termino) && !soloNumeros.test(termino)) 
+            return { valido: false, mensaje : 'El término de búsqueda solo puede contener letras o números.' };
+        else{
+            if (soloLetras.test(termino))
+                return {valido: true, terminoSonLetras: true };
+            else if (soloNumeros.test(termino))
+                return {valido: true, terminoSonLetras: false };
+        }
+
+        
+    }
+
     // Evento para el botón de búsqueda
     searchButton.addEventListener('click', function() {
         const searchTerm = searchInput.value.trim();
-        fetchEmpleados(searchTerm);
+        const validacion = validarTermino(searchTerm);
+        
+        if (!validacion.valido) {
+            tabla.innerHTML = `<tr><td colspan="3">${validacion.mensaje}</td></tr>`;
+            return;
+        }
+
+        fetchEmpleados(searchTerm, validacion.terminoSonLetras);
     });
 
     // Evento para búsqueda al dar ENTER
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
             const searchTerm = this.value.trim();
-            fetchEmpleados(searchTerm);
+            const validacion = validarTermino(searchTerm);
+            
+            if (!validacion.valido) {
+                tabla.innerHTML = `<tr><td colspan="3">${validacion.mensaje}</td></tr>`;
+                return;
+            }
+
+            fetchEmpleados(searchTerm,validacion.terminoSonLetras);
         }
     });
 
     // Función para obtener empleados
-    function fetchEmpleados(term) {
-
+    function fetchEmpleados(term, terminoSonLetras) {
+    
         //actualiza el contenido la tabla con un mensaje de carga
-        tabla.innerHTML = '<tr><td colspan="2">Buscando...</td></tr>';
+        tabla.innerHTML = '<tr><td colspan="3">Buscando...</td></tr>';
 
         // Petición para buscar empleados
-        fetch(`/home/buscar-empleados/?term=${encodeURIComponent(term)}`, {
+        fetch(`/home/buscar-empleados/?term=${encodeURIComponent(term)}&terminoSonLetras=${terminoSonLetras}`, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -78,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if ( data.success && Array.isArray(data.empleados)) {
                 if (data.empleados.length === 0) {
-                    tabla.innerHTML = '<tr><td colspan="2">No hubo coincidencias</td></tr>';
+                    tabla.innerHTML = '<tr><td colspan="3">No hubo coincidencias</td></tr>';
                 } else {
                     actualizarTabla(data.empleados);
                 }
@@ -88,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error en la búsqueda:', error);
-            tabla.innerHTML = `<tr><td colspan="2">Error: ${error.message}</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
         });
     }
 });
