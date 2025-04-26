@@ -64,15 +64,6 @@ def buscar_empleados(request):
         return JsonResponse({"error": "Invalid request"}, status=400)
 
 
-def registrar_busqueda(termino_son_letras):
-    try:
-        connection.ensure_connection()
-        conn = connection.connection
-        query = "EXEC sp_InsertarBitacoraEvento ?"
-        conn.execute(query, [termino_son_letras])
-    except Exception as e:
-        print(f"Error al registrar la búsqueda: {e}")
-
 
 #-------------------------------------------------------------
 # Función para insertar un nuevo empleado
