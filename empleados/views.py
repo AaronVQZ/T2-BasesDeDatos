@@ -1,7 +1,7 @@
+import traceback
 from django.shortcuts import render
-from django.http import JsonResponse
 from django.db import connection
-
+from django.http import JsonResponse
 #-------------------------------------------------------------
 # Vista principal que muestra la lista de empleados
 
@@ -68,7 +68,38 @@ def buscar_empleados(request):
 #-------------------------------------------------------------
 # Función para insertar un nuevo empleado
 def insertar_empleado(request):
-    print("insertar_empleado")
+    if request.method == "POST" and request.headers.get("X-Requested-With"):
+        #Obtenr los datos del formulario
+        valor_doc = request.POST.get("identificacion", "").strip()
+        nombre    = request.POST.get("nombre", "").strip()
+        puesto    = request.POST.get("puesto", "").strip()
+
+        #Definir el id del usuario
+        id_user   = 7
+
+        #Obtener la IP del cliente
+        ip_cliente = request.META.get("REMOTE_ADDR", "")
+
+        try:
+            #Aseguarar conexion
+            connection.ensure_connection()
+            conn = connection.connection
+
+            # 5) Llamada al SP con los 5 parámetros
+            conn.execute(
+                "EXEC dbo.sp_AgregarEmpleado ?, ?, ?, ?, ?",
+                [valor_doc, nombre, puesto, id_user, ip_cliente]
+            )
+
+            # Si no hay excepción, devolvemos JSON de éxito
+            return JsonResponse({"success": True, "mensaje": "Empleado insertado correctamente"})
+
+        except Exception as e:
+            # Capturar cualquier error que lance el THROW del SP
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    # Si no es POST AJAX
+    return JsonResponse({"success": False, "error": "Método no permitido"}, status=400)
 #-------------------------------------------------------------
 # Función para actualizar un empleado existente
 def update_empleado(request):
