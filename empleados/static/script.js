@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-bar');
+//------------------------------------------------------------------------------------------------------------------------
+    // Inicialización de variables y elementos del DOM
+    const searchInput  = document.getElementById('search-bar');
     const searchButton = document.getElementById('search-button');
-    const tabla = document.getElementById('tabla_empleados');
-    
+    const tabla        = document.getElementById('tabla_empleados');
 
-    // Función para actualizar la tabla
+//-------------------------------------------------------------------------------------------------------------------------
+    // Función para actualizar la tabla con los empleados
     function actualizarTabla(empleados) {
-
-        // Para debuggear
         console.log('Empleados:', empleados);
-
-        // Define el encabado de la tabla
+        // Envabezado de la Tabla
         let tableContent = `
             <tr class="encabezado">
                 <th>Nombre</th>
@@ -18,100 +17,72 @@ document.addEventListener('DOMContentLoaded', function() {
                 <th>Acciones</th>
             </tr>
         `;
-        
-        // Agregar las filas de empleados
+
+        // Construye la tabla fila por fila con cada empleado
         empleados.forEach(empleado => {
             tableContent += `
                 <tr>
                     <td>${empleado.nombre}</td>
                     <td>${empleado.identificacion}</td>
                     <td class="acciones">
-                    <button class="boton_consultar" onclick="consultarEmpleado('${empleado.identificacion}')">
-                        Consultar
-                    </button>
-                    <button class="boton_modificar" onclick="modificarEmpleado('${empleado.identificacion}')">
-                        Modificar
-                    </button>
-                    <button class="boton_borrar" onclick="borrarEmpleado('${empleado.identificacion}')">
-                        Borrar
-                    </button>
+                        <button class="boton_consultar" onclick="consultarEmpleado('${empleado.identificacion}')">
+                            Consultar
+                        </button>
+                        <button class="boton_modificar" onclick="modificarEmpleado('${empleado.identificacion}')">
+                            Modificar
+                        </button>
+                        <button class="boton_borrar" onclick="borrarEmpleado('${empleado.identificacion}', '${empleado.nombre}')">
+                            Borrar
+                        </button>
+                    </td>
                 </tr>
             `;
         });
-        // Actualiza el contenido de la tabla
         tabla.innerHTML = tableContent;
     }
 
-
-    // Función para validar el termino de búsqueda
+//------------------------------------------------------------------------------------------------------------------------
+    // Funcion para validar que el término de búsqueda solo contenga letras o números
     function validarTermino(termino) {
-        const soloLetras = /^[a-záéíóúñA-ZÁÉÍÓÚÑ\s]+$/; // Expresión regular para letras y espacios
-        const soloNumeros = /^[0-9]+$/; // Expresión regular para números
+        const soloLetras   = /^[a-záéíóúñA-ZÁÉÍÓÚÑ\s]+$/;
+        const soloNumeros  = /^[0-9]+$/;
 
-        if( !termino)
-            return { valido: true};
-        
-        if (!soloLetras.test(termino) && !soloNumeros.test(termino)) 
-            return { valido: false, mensaje : 'El término de búsqueda solo puede contener letras o números.' };
-        else{
-            if (soloLetras.test(termino))
-                return {valido: true, terminoSonLetras: true };
-            else if (soloNumeros.test(termino))
-                return {valido: true, terminoSonLetras: false };
+        if (!termino) return { valido: true };
+        if (!soloLetras.test(termino) && !soloNumeros.test(termino)) {
+            return { valido: false, mensaje: 'El término de búsqueda solo puede contener letras o números.' };
         }
-
-        
+        return { valido: true, terminoSonLetras: soloLetras.test(termino) };
     }
 
-    // Evento para el botón de búsqueda
-    searchButton.addEventListener('click', function() {
-        const searchTerm = searchInput.value.trim();
-        const validacion = validarTermino(searchTerm);
-        
-        if (!validacion.valido) {
-            tabla.innerHTML = `<tr><td colspan="3">${validacion.mensaje}</td></tr>`;
+//------------------------------------------------------------------------------------------------------------------------
+    // Eventos de búsqueda
+    searchButton.addEventListener('click', buscar);
+    searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') buscar(); });
+
+    function buscar() {
+        const term = searchInput.value.trim();
+        const v    = validarTermino(term);
+        if (!v.valido) {
+            tabla.innerHTML = `<tr><td colspan="3">${v.mensaje}</td></tr>`;
             return;
         }
+        fetchEmpleados(term, v.terminoSonLetras);
+    }
 
-        fetchEmpleados(searchTerm, validacion.terminoSonLetras);
-    });
-
-    // Evento para búsqueda al dar ENTER
-    searchInput.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            const searchTerm = this.value.trim();
-            const validacion = validarTermino(searchTerm);
-            
-            if (!validacion.valido) {
-                tabla.innerHTML = `<tr><td colspan="3">${validacion.mensaje}</td></tr>`;
-                return;
-            }
-
-            fetchEmpleados(searchTerm,validacion.terminoSonLetras);
-        }
-    });
-
-    // Función para obtener empleados
-    function fetchEmpleados(term, terminoSonLetras) {
-    
-        //actualiza el contenido la tabla con un mensaje de carga
+//------------------------------------------------------------------------------------------------------------------------
+    // Funcion para hacer la peticion AJAX para buscar empleados
+    function fetchEmpleados(term, esTexto) {
         tabla.innerHTML = '<tr><td colspan="3">Buscando...</td></tr>';
-
-        // Petición para buscar empleados
-        fetch(`/home/buscar-empleados/?term=${encodeURIComponent(term)}&terminoSonLetras=${terminoSonLetras}`, {
+        fetch(`buscar-empleados/?term=${encodeURIComponent(term)}&terminoSonLetras=${esTexto}`, {
             method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error del servidor: ${response.status}`);
-            }
-            return response.json();
+        .then(r => {
+            if (!r.ok) throw new Error(`Error del servidor: ${r.status}`);
+            return r.json();
         })
         .then(data => {
-            if ( data.success && Array.isArray(data.empleados)) {
+            if (data.success && Array.isArray(data.empleados)) {
                 if (data.empleados.length === 0) {
                     tabla.innerHTML = '<tr><td colspan="3">No hubo coincidencias</td></tr>';
                 } else {
@@ -121,64 +92,152 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Formato de respuesta inválido');
             }
         })
-        .catch(error => {
-            console.error('Error en la búsqueda:', error);
-            tabla.innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
+        .catch(err => {
+            console.error('Error en la búsqueda:', err);
+            tabla.innerHTML = `<tr><td colspan="3">Error: ${err.message}</td></tr>`;
         });
     }
+
+//------------------------------------------------------------------------------------------------------------------------
+    // Modal de Inserción para Agregar un nuevo empleado
     
-     // Modal y formulario
+    //Botones y fomrulario del modal
     const btnAgregar = document.getElementById('boton_agregar');
-    const modal = document.getElementById('modalInsertarEmpleado');
-    const spanCerrar = modal.querySelector('.cerrar');
-    const form = document.getElementById('formInsertarEmpleado');
+    const modalIns   = document.getElementById('modalInsertarEmpleado');
+    const spanCerrar = modalIns.querySelector('.cerrar');
+    const formIns    = document.getElementById('formInsertarEmpleado');
 
+    // Mostrar el modal al hacer clic en el botón "Agregar"
     btnAgregar.addEventListener('click', () => {
-        form.reset();
-        modal.style.display = 'flex';
+        formIns.reset();
+        modalIns.style.display = 'flex';
     });
 
-    spanCerrar.addEventListener('click', () => modal.style.display = 'none');
-    window.addEventListener('click', e => {
-        if (e.target === modal) modal.style.display = 'none';
-    });
+    // Cerrar el modal al hacer clic en la "X" o fuera del modal
+    spanCerrar.addEventListener('click', () => modalIns.style.display = 'none');
+    window.addEventListener('click', e => { if (e.target === modalIns) modalIns.style.display = 'none'; });
 
-    form.addEventListener('submit', function(e) {
+    formIns.addEventListener('submit', e => {
         e.preventDefault();
-        // Validaciones básicas como en tu código original
-        const nombre = form.nombre.value.trim();
-        const idDoc = form.identificacion.value.trim();
-        const puesto = form.puesto.value;
-        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+$/.test(nombre)) {
-        return alert('El nombre solo puede contener letras, espacios y guiones');
-        }
-        if (!/^\d+$/.test(idDoc)) {
-        return alert('La cédula debe ser sólo dígitos');
-        }
-        if (!puesto) {
-        return alert('Selecciona un puesto');
-        }
-
-        const formData = new FormData(form);
         fetch('insertar-empleado/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+            method: 'POST',
+            body: new FormData(formIns),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(r => r.json())
         .then(data => {
-        if (data.mensaje) {
-            alert(data.mensaje);
-            modal.style.display = 'none';
-            location.reload();  // o llamar a tu fetchEmpleados('')
-        } else {
-            alert(data.error || 'Error desconocido');
-        }
+            alert(data.mensaje || data.error || 'Operación completada');
+            if (data.success) location.reload();
         })
         .catch(console.error);
     });
-    
-    
+
+//------------------------------------------------------------------------------------------------------------------------
+    // Modal de Consulta para ver información de un empleado
+    window.consultarEmpleado = function(identificacion) {
+        fetch(`consultar-empleado/?identificacion=${encodeURIComponent(identificacion)}`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const emp = data.empleado;
+                document.getElementById('info-identificacion').textContent = emp.identificacion;
+                document.getElementById('info-nombre').textContent        = emp.nombre;
+                document.getElementById('info-puesto').textContent        = emp.puesto;
+                document.getElementById('info-vacaciones').textContent    = emp.saldoVacaciones.toFixed(2);
+                document.getElementById('modalConsultarEmpleado').style.display = 'flex';
+            } else {
+                alert(data.error || 'Error al obtener información');
+            }
+        })
+        .catch(err => { console.error(err); alert('Error de conexión'); });
+    };
+    const spanCerrarConsultar = document.querySelector('.cerrar-consultar');
+    spanCerrarConsultar.addEventListener('click', () => document.getElementById('modalConsultarEmpleado').style.display = 'none');
+
+//------------------------------------------------------------------------------------------------------------------------
+    // Modal Borrar. Para borardo logico de un empleado
+    window.borrarEmpleado = function(id, nombre) {
+        // Mostrar el modal de confirmación de borrado
+        document.getElementById('borrar-identificacion').textContent = id;
+        document.getElementById('borrar-nombre').textContent         = nombre;
+        document.getElementById('modalBorrarEmpleado').style.display = 'flex';
+    };
+    document.querySelector('.cerrar-borrar').addEventListener('click', () => document.getElementById('modalBorrarEmpleado').style.display = 'none');
+
+    const csrfToken = getCookie('csrftoken');
+
+    //Botones de confirmación y cancelación del modal de borrado
+    document.getElementById('cancelar-borrar').addEventListener('click', () => enviarBorrado(0));
+    document.getElementById('confirmar-borrar').addEventListener('click', () => enviarBorrado(1));
+
+    // Función para enviar la solicitud de borrado
+    function enviarBorrado(confirmar) {
+        const id = document.getElementById('borrar-identificacion').textContent;
+        const fd = new FormData();
+        fd.append('identificacion', id);
+        fd.append('confirmar', confirmar);
+        fetch('borrar-empleado/', {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(r => r.json())
+        .then(data => { alert(data.mensaje || data.error); if (confirmar) location.reload(); })
+        .catch(err => { console.error(err); alert('Error de conexión'); })
+        .finally(() => document.getElementById('modalBorrarEmpleado').style.display = 'none');
+    }
+
+    //------------------------------------------------------------------------------------------------------------------------
+    // Modal Modificar
+    window.modificarEmpleado = function(identificacion) {
+        fetch(`consultar-empleado/?identificacion=${encodeURIComponent(identificacion)}`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) return alert(data.error || 'Empleado no encontrado');
+            const emp = data.empleado;
+            document.getElementById('ident_old').value  = emp.identificacion;
+            document.getElementById('ident_new').value  = emp.identificacion;
+            document.getElementById('nombre_mod').value = emp.nombre;
+            document.getElementById('puesto_mod').value = emp.puesto;
+            document.getElementById('modalModificarEmpleado').style.display = 'flex';
+        })
+        .catch(err => { console.error(err); alert('Error de conexión'); });
+    };
+    document.querySelector('.cerrar-modificar').addEventListener('click', () => document.getElementById('modalModificarEmpleado').style.display = 'none');
+
+    document.getElementById('formModificarEmpleado').addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch('update-empleado/', {
+            method: 'POST',
+            body: new FormData(this),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => { alert(data.mensaje || data.error); if (data.success) location.reload(); })
+        .catch(err => { console.error(err); alert('Error de conexión'); });
+    });
+
+    //------------------------------------------------------------------------------------------------------------------------
+    // Helper para CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            document.cookie.split(';').forEach(cookie => {
+                const [key, val] = cookie.trim().split('=');
+                if (key === name) cookieValue = decodeURIComponent(val);
+            });
+        }
+        return cookieValue;
+    }
+
 });

@@ -76,6 +76,71 @@
     </div>
   </div>
 
+  <!-- Modal Consultar Empleado -->
+  <div id="modalConsultarEmpleado" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar-consultar">&times;</span>
+      <h2>Información del Empleado</h2>
+      <p><strong>Cédula:</strong> <span id="info-identificacion"></span></p>
+      <p><strong>Nombre:</strong> <span id="info-nombre"></span></p>
+      <p><strong>Puesto:</strong> <span id="info-puesto"></span></p>
+      <p><strong>Saldo Vacaciones:</strong> <span id="info-vacaciones"></span></p>
+    </div>
+  </div>
+
+  <!-- Modal Confirmar Borrado -->
+    <div id="modalBorrarEmpleado" class="modal">
+        <div class="modal-contenido">
+        <span class="cerrar-borrar">&times;</span>
+        <h2>Eliminar Empleado</h2>
+        <p>¿Está seguro de eliminar el siguiente empleado?</p>
+        <p><strong>Cédula:</strong> <span id="borrar-identificacion"></span></p>
+        <p><strong>Nombre:</strong> <span id="borrar-nombre"></span></p>
+        <div class="acciones">
+            <button id="confirmar-borrar">Confirmar</button>
+            <button id="cancelar-borrar">Cancelar</button>
+        </div>
+        </div>
+    </div>
+
+    <!-- Modal Modificar Empleado -->
+    <div id="modalModificarEmpleado" class="modal">
+        <div class="modal-contenido">
+        <span class="cerrar-modificar">&times;</span>
+        <h2>Modificar Empleado</h2>
+        <form id="formModificarEmpleado" method="POST">
+            {% csrf_token %}
+            <input type="hidden" id="ident_old" name="ident_old">
+            
+            <label for="ident_new">Documento de Identidad:</label>
+            <input type="text" id="ident_new" name="ident_new" required>
+            <br><br>
+            
+            <label for="nombre_mod">Nombre:</label>
+            <input type="text" id="nombre_mod" name="nombre" required>
+            <br><br>
+            
+            <label for="puesto_mod">Puesto:</label>
+            <select id="puesto_mod" name="puesto" required>
+            <option value="">-- Seleccione --</option>
+            <option value="Cajero">Cajero</option>
+            <option value="Camarero">Camarero</option>
+            <option value="Cuidador">Cuidador</option>
+            <option value="Conductor">Conductor</option>
+            <option value="Asistente">Asistente</option>
+            <option value="Recepcionista">Recepcionista</option>
+            <option value="Fontanero">Fontanero</option>
+            <option value="Niñera">Niñera</option>
+            <option value="Conserje">Conserje</option>
+            <option value="Albañil">Albañil</option>
+            </select>
+            <br><br>
+            
+            <button type="submit">Guardar Cambios</button>
+        </form>
+        </div>
+    </div>
+
   <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
