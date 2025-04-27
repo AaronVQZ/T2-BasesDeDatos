@@ -37,8 +37,8 @@ def obtener_empleados(search_term='',termino_son_letras='',id_usuario=None,ip_us
                 @ipUsuario = ?;
                 """,(search_term, termino_son_letras, int(id_usuario), str(ip_usuario))).fetchall()
     else:
-        query = "EXEC sp_obtenerEmpleados"
-        empleados = conn.execute(query).fetchall()
+        query = "EXEC sp_obtenerEmpleados @idUsuario = ?"
+        empleados = conn.execute(query, id_usuario).fetchall()
 
     # Se convierten los resultados a una lista de diccionarios
     empleados_list = [{'nombre': row[0],'identificacion': row[1],} for row in empleados]
