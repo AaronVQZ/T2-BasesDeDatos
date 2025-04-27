@@ -74,11 +74,9 @@ def insertar_empleado(request):
         nombre    = request.POST.get("nombre", "").strip()
         puesto    = request.POST.get("puesto", "").strip()
 
-        #Definir el id del usuario
-        id_user   = 7
-
-        #Obtener la IP del cliente
-        ip_cliente = request.META.get("REMOTE_ADDR", "")
+        id_usuario = request.session.get("_auth_user_id")
+        ip_usuario = request.session.get("_auth_user_ip")
+        
 
         try:
             #Aseguarar conexion
@@ -88,7 +86,7 @@ def insertar_empleado(request):
             # 5) Llamada al SP con los 5 parámetros
             conn.execute(
                 "EXEC dbo.sp_AgregarEmpleado ?, ?, ?, ?, ?",
-                [valor_doc, nombre, puesto, id_user, ip_cliente]
+                [valor_doc, nombre, puesto, id_usuario, ip_usuario]
             )
 
             # Si no hay excepción, devolvemos JSON de éxito
@@ -103,14 +101,112 @@ def insertar_empleado(request):
 #-------------------------------------------------------------
 # Función para actualizar un empleado existente
 def update_empleado(request):
-    print("update_empleado")
+    if request.method == "POST" and request.headers.get("X-Requested-With"):
+
+        # Obtener los datos del formulario
+        old_doc       = request.POST.get("ident_old", "").strip()
+        new_doc       = request.POST.get("ident_new", "").strip()
+        nombre        = request.POST.get("nombre", "").strip()
+        nombre_puesto = request.POST.get("puesto", "").strip()
+        id_usuario    = request.session.get("_auth_user_id")
+        ip_usuario    = request.session.get("_auth_user_ip")
+
+        try:
+            # Asegurar conexión
+            connection.ensure_connection()
+            conn = connection.connection
+            # Ejecutar el procedimiento almacenado para actualizar el empleado
+            conn.execute(
+                """
+                EXEC dbo.sp_ActualizarEmpleado
+                    @ValorDocumentoIdentidadOld = ?,
+                    @ValorDocumentoIdentidadNew = ?,
+                    @Nombre                     = ?,
+                    @NombrePuesto               = ?,
+                    @UsuarioId                  = ?,
+                    @IpUsuario                  = ?
+                """,
+                [old_doc, new_doc, nombre, nombre_puesto, id_usuario, ip_usuario]
+            )
+            return JsonResponse({
+                "success": True,
+                "mensaje": "Empleado actualizado correctamente"
+            })
+        except Exception as e:
+            # Capturar cualquier error que lance el THROW del SP
+            return JsonResponse({
+                "success": False,
+                "error": str(e)
+            }, status=500)
+
+    return JsonResponse({
+        "success": False,
+        "error": "Método no permitido"
+    }, status=400)
 
 #-------------------------------------------------------------
 # Función para eliminar un empleado
 def delete_empleado(request):
-    print("delete_empleado")
+    if request.method == "POST" and request.headers.get("X-Requested-With"):
+        valor_doc   = request.POST.get("identificacion", "").strip()
+        confirmar   = request.POST.get("confirmar", "1")  # "1"=confirmar, "0"=cancelar
+        id_usuario  = request.session.get("_auth_user_id")
+        ip_usuario  = request.session.get("_auth_user_ip")
+
+        try:
+            connection.ensure_connection()
+            conn = connection.connection
+            conn.execute(
+                """
+                EXEC dbo.sp_EliminarEmpleado
+                    @ValorDocumentoIdentidad = ?,
+                    @UsuarioId               = ?,
+                    @IpUsuario               = ?,
+                    @Confirmar               = ?
+                """,
+                [valor_doc, id_usuario, ip_usuario, int(confirmar)]
+            )
+            # Mensaje distinto según confirmación o intento
+            mensaje = (
+                "Empleado eliminado correctamente"
+                if confirmar == "1"
+                else "Intento de borrado registrado en bitácora"
+            )
+            return JsonResponse({"success": True, "mensaje": mensaje})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Método no permitido"}, status=400)
+
 
 #-------------------------------------------------------------
-# Función para consultar un empleado específico
-def consular_empleado(request):
-    print("consultar_empleado")
+
+#Funcion para consultar un empleado
+def consultar_empleado(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        valor      = request.GET.get('identificacion', '').strip()
+        id_usuario = request.session.get("_auth_user_id") or 0
+
+        try:
+            connection.ensure_connection()
+            conn = connection.connection
+            row = conn.execute(
+                "EXEC dbo.sp_ConsultarEmpleado @ValorDocumentoIdentidad = ?, @UsuarioId = ?",
+                [valor, int(id_usuario)]
+            ).fetchone()
+
+            if not row:
+                return JsonResponse({"success": False, "error": "Empleado no encontrado"}, status=404)
+
+            empleado = {
+                "identificacion": row[0],
+                "nombre":         row[1],
+                "puesto":         row[2],
+                "saldoVacaciones": float(row[3]),
+            }
+            return JsonResponse({"success": True, "empleado": empleado})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
