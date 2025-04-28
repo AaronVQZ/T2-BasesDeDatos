@@ -41,13 +41,13 @@ def login(request):
             conn = connection.connection
 
             # Ejecutar SP para verificar si la IP está bloqueada
-            result = conn.execute("""
-                DECLARE @IntentosRecientes INT, @EstaBloqueado BIT;
+            result = conn.execute("""DECLARE @IntentosRecientes INT, @EstaBloqueado BIT;
+                                  
                 EXEC dbo.sp_VerificarIntentosFallidos 
                     @IP = ?, 
                     @IntentosRecientes = @IntentosRecientes OUTPUT,
                     @EstaBloqueado = @EstaBloqueado OUTPUT;
-                SELECT @IntentosRecientes AS IntentosRecientes, @EstaBloqueado AS EstaBloqueado;
+                    SELECT @IntentosRecientes AS IntentosRecientes, @EstaBloqueado AS EstaBloqueado;
             """, (ip,)).fetchone()
 
             #En caso de que la IP esté bloqueada, se retorna un mensaje de error
@@ -58,15 +58,15 @@ def login(request):
                 }, status=403)
 
             # Si no está bloqueada, se procede a verificar las credenciales, por medio del SP
-            result = conn.execute("""
-                DECLARE @EsValido BIT, @Mensaje VARCHAR(200);
+            result = conn.execute(""" DECLARE @EsValido BIT, @Mensaje VARCHAR(200);
+                                  
                 EXEC dbo.sp_ValidarUsuario 
                     @Username = ?, 
                     @Password = ?, 
                     @IP = ?, 
                     @EsValido = @EsValido OUTPUT, 
                     @Mensaje = @Mensaje OUTPUT;
-                SELECT @EsValido AS EsValido, @Mensaje AS Mensaje;
+                    SELECT @EsValido AS EsValido, @Mensaje AS Mensaje;
             """, (username, password, ip)).fetchone()
 
             #Obtenrer el resultado de la validación
@@ -78,8 +78,8 @@ def login(request):
             # Si las credenciales son válidas, se redirige al usuario a la página de inicio
             if es_valido:
                 #obtener el id del usuario
-                id_usuario = conn.execute("""
-                        DECLARE @Id INT;
+                id_usuario = conn.execute(""" DECLARE @Id INT;
+                                          
                         EXEC dbo.sp_GetIdUsuario 
                             @Username = ?,
                             @Password = ?, 
@@ -110,13 +110,13 @@ def login(request):
             conn = connection.connection
 
             #Verificar si la IP está bloqueada al cargar la página
-            result = conn.execute("""
-                DECLARE @IntentosRecientes INT, @EstaBloqueado BIT;
+            result = conn.execute(""" DECLARE @IntentosRecientes INT, @EstaBloqueado BIT;
+                                  
                 EXEC dbo.sp_VerificarIntentosFallidos 
                     @IP = ?, 
                     @IntentosRecientes = @IntentosRecientes OUTPUT,
                     @EstaBloqueado = @EstaBloqueado OUTPUT;
-                SELECT @IntentosRecientes AS IntentosRecientes, @EstaBloqueado AS EstaBloqueado;
+                    SELECT @IntentosRecientes AS IntentosRecientes, @EstaBloqueado AS EstaBloqueado;
             """, (ip,)).fetchone()
 
             #En caso de que la IP esté bloqueada, se muestrra un aviso
