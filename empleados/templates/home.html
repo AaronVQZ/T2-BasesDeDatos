@@ -17,7 +17,8 @@
     <input type="text" id="search-bar" class="search-input" placeholder="Buscar empleados..." value="{{ search_query }}">
     <button id="search-button" class="search-button">Buscar</button>
   </div>
-
+  <br>
+  <br>
   <div class="contenedor_lista">
     <table class="tabla" id="tabla_empleados">
       <tr class="encabezado">
@@ -33,6 +34,7 @@
           <button class="boton_consultar" onclick="consultarEmpleado('{{ empleado.identificacion }}')">Consultar</button>
           <button class="boton_modificar" onclick="modificarEmpleado('{{ empleado.identificacion }}')">Modificar</button>
           <button class="boton_borrar" onclick="borrarEmpleado('{{ empleado.identificacion }}')">Borrar</button>
+          <button class="boton_movimientos" onclick="verMovimientos('{{empleado.identificacion}}','{{empleado.nombre}}')">Movimientos</button>
         </td>
       </tr>
       {% endfor %}

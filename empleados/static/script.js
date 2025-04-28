@@ -97,8 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
             tabla.innerHTML = `<tr><td colspan="3">Error: ${err.message}</td></tr>`;
         });
     }
-
-//------------------------------------------------------------------------------------------------------------------------
+    
+    
+    //------------------------------------------------------------------------------------------------------------------------
     // Modal de Inserción para Agregar un nuevo empleado
     
     //Botones y fomrulario del modal
@@ -106,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalIns   = document.getElementById('modalInsertarEmpleado');
     const spanCerrar = modalIns.querySelector('.cerrar');
     const formIns    = document.getElementById('formInsertarEmpleado');
-
+    
     // Mostrar el modal al hacer clic en el botón "Agregar"
     btnAgregar.addEventListener('click', () => {
         formIns.reset();
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cerrar el modal al hacer clic en la "X" o fuera del modal
     spanCerrar.addEventListener('click', () => modalIns.style.display = 'none');
     window.addEventListener('click', e => { if (e.target === modalIns) modalIns.style.display = 'none'; });
-
+    
     formIns.addEventListener('submit', e => {
         e.preventDefault();
         fetch('insertar-empleado/', {
@@ -241,3 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 });
+
+function verMovimientos(identificacion, nombre) {
+    window.location.href = `/home/movimientos/${identificacion}?nombre=${encodeURIComponent(nombre)}`;
+
+}

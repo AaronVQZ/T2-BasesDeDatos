@@ -213,30 +213,51 @@ def consultar_empleado(request):
 def obtener_saldo_vacaciones(request):
     pass
 
-def obtenerMovimientos(request):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        try:
-            id_usuario = request.session.get("_auth_user_id")
-            valor_doc  = request.GET.get("identificacion", "").strip()
+def movimientos(request, identificacion):
+    
+    try:
+        id_usuario = request.session.get("_auth_user_id")
+        nombre  = request.GET.get("nombre", "").strip()
+        
+        connection.ensure_connection()
+        conn = connection.connection
+
+        saldo = conn.execute(
+            """
+            EXEC dbo.sp_GetSaldo
+                @idUsuario = ?,
+                @identificacion = ?
+            """,
+            (int(id_usuario), identificacion)).fetchone()[0]
             
-            connection.ensure_connection()
-            conn = connection.connection
             
-            movimientos = conn.execute(
+        movimientos = conn.execute(
                 """
-                EXEC dbo.sp_ObtenerMovimientos idUsuario = ?,
-                    ValorDocumentoIdentidad = ?
+                EXEC dbo.sp_ObtenerMovimientos 
+                    @idUsuario = ?,
+                    @ValorDocumentoIdentidad = ?
                 """,
-                (id_usuario, valor_doc)
-            ).fetchall()
+                (int(id_usuario), identificacion)).fetchall()
 
-            # Convertir los resultados a una lista de diccionarios
-            movimientos_list = [{'fecha': row[0], 'tipoMovimiento': row[1], 'monto': row[2], 'nuevoSaldo': row[3],
-                                 'username': row[4], 'postInIp': row[5], 'postTime': row[6]} for row in movimientos]
+        # Convertir los resultados a una lista de diccionarios
+        movimientos_list = [{
+            'fecha': row[0],
+            'tipo': row[1],
+            'monto': float(row[2]) if row[2] else 0.0, 
+            'saldo': float(row[3]) if row[3] else 0.0,
+            'usuario': row[4], 
+            'ip': row[5], 
+            'hora': row[6]
+            } for row in movimientos]
+        return render(request, "movimientos.html", {
+                "movimientos": movimientos_list,
+                "identificacion": identificacion,
+                "nombre": nombre,
+                "saldo": saldo,
+                "error": None
+                })
 
-            return JsonResponse({"success": True, "movimientos": movimientos_list}, safe=False)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+    

@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
+  <link rel="stylesheet" href="{% static 'estilos.css' %}">
+  <title>Control de Movimientos</title>
+</head>
+<body>
+  <div class="contenedor_titulo">
+    <h1 id="titulo">Control de Movimientos</h1>
+  </div>
+
+
+  <div class ="info_empleado">
+    <h2>Información del Empleado</h2>
+    <p><strong>Nombre:</strong> {{ nombre }}</p>
+    <p><strong>Identificación:</strong> {{ identificacion }}</p>
+    <p><strong>Saldo:</strong> {{ saldo }}</p>
+  </div>
+
+
+
+  <div class="contenedor_lista">
+    <table class="tabla" id="listaMovimientos">
+      <tr class="encabezado">
+        <th>Fecha</th>
+        <th>Tipo</th>
+        <th>Monto</th>
+        <th>Saldo</th>
+        <th>Usuario</th>
+        <th>Ip</th>
+        <th>Hora</th>
+      </tr>
+      {% for movimiento in movimientos %}
+      <tr>
+        <td>{{ movimiento.fecha }}</td>
+        <td>{{ movimiento.tipo }}</td>
+        <td>{{ movimiento.monto }}</td>
+        <td>{{ movimiento.saldo }}</td>
+        <td>{{ movimiento.usuario }}</td>
+        <td>{{ movimiento.ip }}</td>
+        <td>{{ movimiento.hora }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="contenedor_botones">
+    <button id="boton_agregar">Agregar Movimiento</button>
+  </div>
+
+
+  <script src="{% static 'script.js' %}"></script>
+</body>
+</html>
