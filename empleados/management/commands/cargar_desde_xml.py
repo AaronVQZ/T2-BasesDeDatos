@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection
 
 class Command(BaseCommand):
-    help = 'Carga datos desde XML usando SPs sin cursores'
+    help = 'Carga datos desde XML'
 
     def handle(self, *args, **kwargs):
         tree = ET.parse('datos_mejorados.xml')
