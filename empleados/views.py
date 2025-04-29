@@ -68,7 +68,7 @@ def buscar_empleados(request):
 #-------------------------------------------------------------
 # Función para insertar un nuevo empleado
 def insertar_empleado(request):
-    if request.method == "POST" and request.headers.get("X-Requested-With"):
+    if request.method == "POST":# and request.headers.get("X-Requested-With"):
         #Obtenr los datos del formulario
         valor_doc = request.POST.get("identificacion", "").strip()
         nombre    = request.POST.get("nombre", "").strip()
@@ -97,7 +97,7 @@ def insertar_empleado(request):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     # Si no es POST AJAX
-    return JsonResponse({"success": False, "error": "Método no permitido"}, status=400)
+    return JsonResponse({"success": False, "error": "Método no permitido."}, status=400)
 #-------------------------------------------------------------
 # Función para actualizar un empleado existente
 def update_empleado(request):
@@ -264,7 +264,6 @@ def insertar_movimiento(request):
     #if request.headers.get("X-Requested-With") == "XMLHttpRequest":
     if request.method == "POST":
         try:
-            print("Insertando movimiento---------------------------")
             id_usuario = request.session.get("_auth_user_id")
             ip_usuario = request.session.get("_auth_user_ip")
             identificacion = request.POST.get("identificacion", "").strip()
@@ -286,7 +285,22 @@ def insertar_movimiento(request):
                 """,
                 (int(id_usuario), str(ip_usuario), identificacion.strip(), tipo.strip(), float(monto))
             )
-            return JsonResponse({"success": True, "mensaje": "Movimiento agregado correctamente"})
+
+            saldo = conn.execute(
+                """
+                EXEC dbo.sp_GetSaldo 
+                    @idUsuario = ?,
+                    @identificacion = ?
+                """,
+                (int(id_usuario), identificacion.strip())
+            ).fetchone()[0]
+
+
+
+
+            return JsonResponse({"success": True, 
+                                 "mensaje": "Movimiento agregado correctamente", 
+                                 "nuevo_saldo": saldo})
         except Exception as e:
             print(f"Error al insertar movimiento: {e}")
             return JsonResponse({"success": False, "error": str(e)}, status=500)

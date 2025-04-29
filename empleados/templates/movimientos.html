@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
   <link rel="stylesheet" href="{% static 'estilos.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <title>Control de Movimientos</title>
 </head>
 <body>
@@ -18,7 +19,7 @@
     <h2>Información del Empleado</h2>
     <p><strong>Nombre:</strong> {{ nombre }}</p>
     <p><strong>Identificación:</strong> {{ identificacion }}</p>
-    <p><strong>Saldo:</strong> {{ saldo }}</p>
+    <p id="saldoP"><strong>Saldo:</strong> {{ saldo }}</p>
   </div>
 
 

@@ -46,10 +46,34 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
-                window.location.reload();
+                
+                const saldoElemento = document.getElementById('saldoP');
+                
+                saldoElemento.innerHTML = `<strong>Saldo:</strong> ${data.nuevo_saldo}`;
+
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Se ha registrado el movimiento correctamente',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                }).then(() => {
+                    location.reload();
+                });
             } else {
-                alert(data.error || 'Error al registrar el movimiento');
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Error!',
+                    text: data.error || 'Error al registrar el movimiento',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
         })
         .catch(error => {

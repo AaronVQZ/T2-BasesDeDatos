@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button class="boton_borrar" onclick="borrarEmpleado('${empleado.identificacion}', '${empleado.nombre}')">
                             Borrar
                         </button>
+                        <button class="boton_movimientos" onclick="verMovimientos('${empleado.identificacion}','${empleado.nombre}')">Movimientos
+                        </button>
                     </td>
                 </tr>
             `;
@@ -131,8 +133,23 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(r => r.json())
         .then(data => {
-            alert(data.mensaje || data.error || 'Operación completada');
-            if (data.success) location.reload();
+            if (data.success) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'El Empleado ha sido agregado correctamente',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                }).then(() => {
+                    location.reload();
+                });
+            }
         })
         .catch(console.error);
     });
@@ -194,7 +211,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(r => r.json())
-        .then(data => { alert(data.mensaje || data.error); if (confirmar) location.reload(); })
+        .then(data => { 
+            if (confirmar) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: 'Eliminado',
+                    text: 'Los datos del empleado han sido eliminados del sistema',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                }).then(() => {
+                    location.reload();
+                });
+            }
+                
+        })
         .catch(err => { console.error(err); alert('Error de conexión'); })
         .finally(() => document.getElementById('modalBorrarEmpleado').style.display = 'none');
     }
@@ -228,8 +264,33 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(r => r.json())
-        .then(data => { alert(data.mensaje || data.error); if (data.success) location.reload(); })
-        .catch(err => { console.error(err); alert('Error de conexión'); });
+        .then(data => { 
+            if (data.success) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Los datos del empleado han sido actualizados',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Error!',
+                    text: data.error || 'Error al actualizar empleado',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        })     
     });
 
     //------------------------------------------------------------------------------------------------------------------------

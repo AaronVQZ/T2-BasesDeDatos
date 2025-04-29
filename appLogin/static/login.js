@@ -45,6 +45,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
             //Verifica si la respuesta es exitosa o no
             if (data.success) {
+                Swal.fire({
+                    title: '¡Hola! ' + username,
+                    text: data.message || "Bienvenido de nuevo",
+                    icon: 'success',
+                    timer: 2000
+                });
                 // Si la respuesta es exitosa, redirigir al usuario a la página de inicio
                 window.location.href = data.redirect;
             } 
