@@ -178,9 +178,7 @@ def delete_empleado(request):
 
     return JsonResponse({"success": False, "error": "Método no permitido"}, status=400)
 
-
 #-------------------------------------------------------------
-
 #Funcion para consultar un empleado
 def consultar_empleado(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -210,3 +208,86 @@ def consultar_empleado(request):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+#-------------------------------------------------------------
+#funcion para obtener el saldo de vacaciones de un empleado
+def obtener_saldo_vacaciones(request):
+    pass
+
+def movimientos(request, identificacion):
+    
+    try:
+        id_usuario = request.session.get("_auth_user_id")
+        nombre  = request.GET.get("nombre", "").strip()
+        
+        connection.ensure_connection()
+        conn = connection.connection
+
+        saldo = conn.execute(
+            """
+            EXEC dbo.sp_GetSaldo
+                @idUsuario = ?,
+                @identificacion = ?
+            """,
+            (int(id_usuario), identificacion)).fetchone()[0]
+            
+            
+        movimientos = conn.execute(
+                """
+                EXEC dbo.sp_ObtenerMovimientos 
+                    @idUsuario = ?,
+                    @ValorDocumentoIdentidad = ?
+                """,
+                (int(id_usuario), identificacion)).fetchall()
+
+        # Convertir los resultados a una lista de diccionarios
+        movimientos_list = [{
+            'fecha': row[0],
+            'tipo': row[1],
+            'monto': float(row[2]) if row[2] else 0.0, 
+            'saldo': float(row[3]) if row[3] else 0.0,
+            'usuario': row[4], 
+            'ip': row[5], 
+            'hora': row[6]
+            } for row in movimientos]
+        return render(request, "movimientos.html", {
+                "movimientos": movimientos_list,
+                "identificacion": identificacion,
+                "nombre": nombre,
+                "saldo": saldo,
+                "error": None
+                })
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+def insertar_movimiento(request):
+    #if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+    if request.method == "POST":
+        try:
+            print("Insertando movimiento---------------------------")
+            id_usuario = request.session.get("_auth_user_id")
+            ip_usuario = request.session.get("_auth_user_ip")
+            identificacion = request.POST.get("identificacion", "").strip()
+            tipo = request.POST.get("tipo_movimiento", "").strip()
+            monto = float(request.POST.get("monto", 0.0))
+
+            connection.ensure_connection()
+            conn = connection.connection
+
+            print(f"Datos recibidos: id={identificacion}, tipo={tipo}, monto={monto}")  # Debug log
+            conn.execute(
+                """
+                EXEC dbo.sp_AgregarMovimiento 
+                    @idUsuario = ?,
+                    @ipUsuario = ?,
+                    @identificacion = ?,
+                    @idTipoMovimiento = ?,
+                    @monto = ?
+                """,
+                (int(id_usuario), str(ip_usuario), identificacion.strip(), tipo.strip(), float(monto))
+            )
+            return JsonResponse({"success": True, "mensaje": "Movimiento agregado correctamente"})
+        except Exception as e:
+            print(f"Error al insertar movimiento: {e}")
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)

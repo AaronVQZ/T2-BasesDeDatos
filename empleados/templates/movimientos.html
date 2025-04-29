@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
+  <link rel="stylesheet" href="{% static 'estilos.css' %}">
+  <title>Control de Movimientos</title>
+</head>
+<body>
+  <div class="contenedor_titulo">
+    <h1 id="titulo">Control de Movimientos</h1>
+  </div>
+
+
+  <div class ="info_empleado">
+    <h2>Información del Empleado</h2>
+    <p><strong>Nombre:</strong> {{ nombre }}</p>
+    <p><strong>Identificación:</strong> {{ identificacion }}</p>
+    <p><strong>Saldo:</strong> {{ saldo }}</p>
+  </div>
+
+
+
+  <div class="contenedor_lista">
+    <table class="tabla" id="listaMovimientos">
+      <tr class="encabezado">
+        <th>Fecha</th>
+        <th>Tipo</th>
+        <th>Monto</th>
+        <th>Saldo</th>
+        <th>Usuario</th>
+        <th>Ip</th>
+        <th>Hora</th>
+      </tr>
+      {% for movimiento in movimientos %}
+      <tr>
+        <td>{{ movimiento.fecha }}</td>
+        <td>{{ movimiento.tipo }}</td>
+        <td>{{ movimiento.monto }}</td>
+        <td>{{ movimiento.saldo }}</td>
+        <td>{{ movimiento.usuario }}</td>
+        <td>{{ movimiento.ip }}</td>
+        <td>{{ movimiento.hora }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="contenedor_botones">
+    <button id="boton_agregar_movimiento" type="button">Agregar Movimiento</button>
+  </div>
+  <!-- Modal Insertar Movimiento --> 
+
+  <div id="modalInsertarMovimiento" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrarMov">&times;</span>
+      <h2>Registrar Movimiento</h2>
+      <form id="formInsertarMovimiento" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="identificacion" value="{{ identificacion }}">
+        
+        <label for="tipo_movimiento">Tipo de Movimiento:</label>
+        <select id="tipo_movimiento" name="tipo_movimiento" required>
+          <option value="">Seleccione un tipo</option>
+          <option value="1">Cumplir mes</option>
+          <option value="2">Bono vacacional</option>
+          <option value="3">Reversión de débito</option>
+          <option value="4">Disfrute de vacaciones</option>
+          <option value="5">Venta de vacaciones</option>
+          <option value="6">Reversión de crédito</option>
+        </select>
+        <br><br>
+
+        <label for="monto">Monto:</label>
+        <input type="number" id="monto" name="monto"  required  >
+        <span id = "monto-error" class="error-message"></span>
+        <br><br>
+
+        <button type="submit" class="btn-primario">Guardar</button>
+        <button type="button" class="btn-secundario">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+</body>
+
+  <script src="{% static 'movimientos.js' %}"></script>
+</body>
+</html>
