@@ -260,4 +260,34 @@ def movimientos(request, identificacion):
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-    
+def insertar_movimiento(request):
+    #if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+    if request.method == "POST":
+        try:
+            print("Insertando movimiento---------------------------")
+            id_usuario = request.session.get("_auth_user_id")
+            ip_usuario = request.session.get("_auth_user_ip")
+            identificacion = request.POST.get("identificacion", "").strip()
+            tipo = request.POST.get("tipo_movimiento", "").strip()
+            monto = float(request.POST.get("monto", 0.0))
+
+            connection.ensure_connection()
+            conn = connection.connection
+
+            print(f"Datos recibidos: id={identificacion}, tipo={tipo}, monto={monto}")  # Debug log
+            conn.execute(
+                """
+                EXEC dbo.sp_AgregarMovimiento 
+                    @idUsuario = ?,
+                    @ipUsuario = ?,
+                    @identificacion = ?,
+                    @idTipoMovimiento = ?,
+                    @monto = ?
+                """,
+                (int(id_usuario), str(ip_usuario), identificacion.strip(), tipo.strip(), float(monto))
+            )
+            return JsonResponse({"success": True, "mensaje": "Movimiento agregado correctamente"})
+        except Exception as e:
+            print(f"Error al insertar movimiento: {e}")
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)

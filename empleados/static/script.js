@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput  = document.getElementById('search-bar');
     const searchButton = document.getElementById('search-button');
     const tabla        = document.getElementById('tabla_empleados');
+    
+    
+
+    
 
 //-------------------------------------------------------------------------------------------------------------------------
     // Función para actualizar la tabla con los empleados
@@ -240,6 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return cookieValue;
     }
+
 
 });
 
