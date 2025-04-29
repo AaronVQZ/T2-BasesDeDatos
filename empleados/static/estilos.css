@@ -291,3 +291,16 @@ select:focus {
 .modal-contenido form {
     text-align: center;
 }
+
+.swal2-container {
+    z-index: 2000 !important;
+
+}
+
+.swal2-popup {
+    background-color: #1e1e1e !important; /* Dark background for the modal */
+    color: #ffffff !important; /* White text color for the modal */
+}
+.swal2-title {
+    color: #ffffff !important; /* White title color for the modal */
+}
