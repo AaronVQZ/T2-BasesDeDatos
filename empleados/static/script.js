@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
-
+//comentario
 function verMovimientos(identificacion, nombre) {
     window.location.href = `/home/movimientos/${identificacion}?nombre=${encodeURIComponent(nombre)}`;
 
